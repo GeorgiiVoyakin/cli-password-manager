@@ -1,10 +1,10 @@
-use std::fs::File;
-use std::io::prelude::*;
 use ring::digest;
-use std::num::NonZeroU32;
+use ring::pbkdf2;
 use ring::rand;
 use ring::rand::SecureRandom;
-use ring::pbkdf2;
+use std::fs::File;
+use std::io::prelude::*;
+use std::num::NonZeroU32;
 
 fn encode_password(password: &str) -> String {
     base64::encode(password)
@@ -23,15 +23,17 @@ fn main() {
     const CREDENTIAL_LEN: usize = digest::SHA512_OUTPUT_LEN;
     let n_iter = NonZeroU32::new(100_000).unwrap();
     let rng = rand::SystemRandom::new();
-
     let mut salt = [0u8; CREDENTIAL_LEN];
     match rng.fill(&mut salt) {
-        Ok(_) => {},
+        Ok(_) => {}
         Err(_) => panic!("Cannot generate salt"),
     }
 
     let mut password = String::new();
-    std::io::stdin().read_to_string(&mut password).unwrap();
+    println!("Enter master password: ");
+    std::io::stdin()
+        .read_line(&mut password)
+        .expect("Failed to read line");
     let mut pbkdf2_hash = [0u8; CREDENTIAL_LEN];
     pbkdf2::derive(
         pbkdf2::PBKDF2_HMAC_SHA512,
@@ -42,6 +44,7 @@ fn main() {
     );
 
     let mut file = File::open("master_password.txt");
+    file.write(&pbkdf2_hash, &salt).unwrap();
 }
 
 #[test]
@@ -58,4 +61,9 @@ fn test_decoding() {
 #[test]
 fn test_save_master_password() -> std::io::Result<()> {
     save_master_password(b"master_password")
+}
+
+#[test]
+fn test_get_master_password() {
+    assert_eq!("password", get_master_password());
 }
