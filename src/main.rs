@@ -8,6 +8,12 @@ fn decode_password(encoded: &[u8]) -> Result<Vec<u8>, base64::DecodeError> {
     base64::decode(encoded)
 }
 
+fn save_master_password(master_password: &[u8]) -> std::io::Result<()> {
+    let mut file = File::create("password.txt")?;
+    file.write_all(master_password)?;
+    Ok(())
+}
+
 fn main() {
     println!("Hello, world!");
 }
@@ -25,7 +31,5 @@ fn test_decoding() {
 
 #[test]
 fn test_save_master_password() -> std::io::Result<()> {
-    let mut file = File::create("password.txt")?;
-    file.write_all(b"master password hash")?;
-    Ok(())
+    save_master_password(b"master_password")
 }
