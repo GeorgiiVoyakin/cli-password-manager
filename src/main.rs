@@ -7,7 +7,6 @@ use std::fs::File;
 use std::io::prelude::*;
 use std::num::NonZeroU32;
 use std::result;
-use postgres::{Client, NoTls, Error};
 
 fn encode_password(password: &str) -> String {
     base64::encode(password)
