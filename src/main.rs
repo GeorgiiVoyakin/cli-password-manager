@@ -1,8 +1,11 @@
-fn encode_password(password: &str) -> std::result::Result<(), ()> {
-    todo!();
+use std::fs::File;
+use std::io::prelude::*;
+
+fn encode_password(password: &str) -> String {
+    base64::encode(password)
 }
-fn decode_password(encoded: &[u8]) -> std::result::Result<&str, ()> {
-    todo!();
+fn decode_password(encoded: &[u8]) -> Result<Vec<u8>, base64::DecodeError> {
+    base64::decode(encoded)
 }
 
 fn main() {
@@ -11,11 +14,18 @@ fn main() {
 
 #[test]
 fn test_encoding() {
-    assert!(encode_password("password").is_ok());
+    assert_eq!(false, encode_password("password").is_empty());
 }
 
 #[test]
 fn test_decoding() {
     let coded = b"cGFzc3dvcmQ=";
-    assert_eq!(decode_password(coded).unwrap(), "password");
+    assert_eq!(&decode_password(coded).unwrap()[..], b"password");
+}
+
+#[test]
+fn test_save_master_password() -> std::io::Result<()> {
+    let mut file = File::create("password.txt")?;
+    file.write_all(b"master password hash")?;
+    Ok(())
 }
