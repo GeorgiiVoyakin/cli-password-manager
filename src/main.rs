@@ -17,13 +17,13 @@ fn decode_password(encoded: &[u8]) -> result::Result<Vec<u8>, base64::DecodeErro
 }
 
 fn save_master_password(master_password: &[u8]) -> std::io::Result<()> {
-    let mut file = File::create("password.txt")?;
+    let mut file = File::create("password")?;
     file.write_all(master_password)?;
     Ok(())
 }
 
 fn verify_master_password(password_to_verify: &str, n_iter: NonZeroU32, salt: &[u8], pbkdf2_hash: &mut [u8]) -> result::Result<(), error::Unspecified> {
-    let file = File::open("master_password.txt");
+    let file = File::open("master_password");
     pbkdf2::verify(pbkdf2::PBKDF2_HMAC_SHA512, n_iter, salt, password_to_verify.as_bytes(), pbkdf2_hash)
 }
 
@@ -51,7 +51,7 @@ fn main() {
         &mut pbkdf2_hash,
     );
 
-    let mut file = File::open("master_password.txt").unwrap();
+    let mut file = File::create("master_password").unwrap();
     file.write(&pbkdf2_hash).unwrap();
     file.write(&salt).unwrap();
 }
